@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package resonate.api.play;
+option go_package = "play";
+
+service PlayService {
+  rpc Play(UserTrack) returns (stream TrackData);
+}
+
+message UserTrack {
+  string user_id = 1; // required
+  string track_id = 2; // required
+}
+
+message TrackData {
+  string track_server_id = 1;
+  int32 start_position = 2;
+  int32 num_bytes = 3;
+  bytes data = 4;
+}
+
+message Empty {
+}
+

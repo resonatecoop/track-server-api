@@ -1,3 +1,2 @@
-# Track-server API
+This API is still work in progress, not yet functioning or passing tests. 
 
-This is the API that sends track audio data to a player.
