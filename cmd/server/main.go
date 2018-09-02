@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	playServer "track-server-api/internal/server"
+	trackDataServer "track-server-api/internal/server"
 	rpc "track-server-api/rpc"
 
 	"github.com/rs/cors"
@@ -23,13 +23,13 @@ func WithURLQuery(base http.Handler) http.Handler {
 }
 
 func main() {
-	fmt.Printf("Track Play Service on :8081")
+	fmt.Printf("TrackData Service on :8081")
 
-	newPlayServer := playServer.NewServer()
-	playTwirpHandler := rpc.NewPlayServiceServer(newPlayServer, nil)
+	newTrackDataServer := trackDataServer.NewServer()
+	trackDataTwirpHandler := rpc.NewTrackDataServiceServer(newTrackDataServer, nil)
 
 	mux := http.NewServeMux()
-	mux.Handle(rpc.PlayServicePathPrefix, playTwirpHandler)
+	mux.Handle(rpc.TrackDataServicePathPrefix, trackDataTwirpHandler)
 
 	handler := cors.Default().Handler(mux)
 

@@ -2,13 +2,13 @@
 // source: rpc/service.proto
 
 /*
-Package play is a generated twirp stub package.
+Package trackdata is a generated twirp stub package.
 This code was generated with github.com/twitchtv/twirp/protoc-gen-twirp v5.3.0.
 
 It is generated from these files:
 	rpc/service.proto
 */
-package play
+package trackdata
 
 import bytes "bytes"
 import strings "strings"
@@ -30,46 +30,47 @@ import url "net/url"
 import bufio "bufio"
 import binary "encoding/binary"
 
-// =====================
-// PlayService Interface
-// =====================
+// ==========================
+// TrackDataService Interface
+// ==========================
 
-type PlayService interface {
-	Play(ctx context.Context, in *UserTrack) (<-chan TrackDataOrError, error)
+type TrackDataService interface {
+	StreamTrackData(ctx context.Context, in *UserTrack) (<-chan TrackDataOrError, error)
 }
 
-// ===========================
-// PlayService Protobuf Client
-// ===========================
+// ================================
+// TrackDataService Protobuf Client
+// ================================
 
-type playServiceProtobufClient struct {
+type trackDataServiceProtobufClient struct {
 	client HTTPClient
-	urls   [1]string
+	urls   [2]string
 }
 
-// NewPlayServiceProtobufClient creates a Protobuf client that implements the PlayService interface.
+// NewTrackDataServiceProtobufClient creates a Protobuf client that implements the TrackDataService interface.
 // It communicates using Protobuf and can be configured with a custom HTTPClient.
-func NewPlayServiceProtobufClient(addr string, client HTTPClient) PlayService {
-	prefix := urlBase(addr) + PlayServicePathPrefix
-	urls := [1]string{
-		prefix + "Play",
+func NewTrackDataServiceProtobufClient(addr string, client HTTPClient) TrackDataService {
+	prefix := urlBase(addr) + TrackDataServicePathPrefix
+	urls := [2]string{
+		prefix + "StreamTrackData",
+		prefix + "UploadTrackData",
 	}
 	if httpClient, ok := client.(*http.Client); ok {
-		return &playServiceProtobufClient{
+		return &trackDataServiceProtobufClient{
 			client: withoutRedirects(httpClient),
 			urls:   urls,
 		}
 	}
-	return &playServiceProtobufClient{
+	return &trackDataServiceProtobufClient{
 		client: client,
 		urls:   urls,
 	}
 }
 
-func (c *playServiceProtobufClient) Play(ctx context.Context, in *UserTrack) (<-chan TrackDataOrError, error) {
-	ctx = ctxsetters.WithPackageName(ctx, "resonate.api.play")
-	ctx = ctxsetters.WithServiceName(ctx, "PlayService")
-	ctx = ctxsetters.WithMethodName(ctx, "Play")
+func (c *trackDataServiceProtobufClient) StreamTrackData(ctx context.Context, in *UserTrack) (<-chan TrackDataOrError, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "resonate.api.trackdata")
+	ctx = ctxsetters.WithServiceName(ctx, "TrackDataService")
+	ctx = ctxsetters.WithMethodName(ctx, "StreamTrackData")
 	reqBodyBytes, err := proto.Marshal(in)
 	if err != nil {
 		return nil, clientError("failed to marshal proto request", err)
@@ -119,38 +120,39 @@ func (c *playServiceProtobufClient) Play(ctx context.Context, in *UserTrack) (<-
 	return respStream, nil
 }
 
-// =======================
-// PlayService JSON Client
-// =======================
+// ============================
+// TrackDataService JSON Client
+// ============================
 
-type playServiceJSONClient struct {
+type trackDataServiceJSONClient struct {
 	client HTTPClient
-	urls   [1]string
+	urls   [2]string
 }
 
-// NewPlayServiceJSONClient creates a JSON client that implements the PlayService interface.
+// NewTrackDataServiceJSONClient creates a JSON client that implements the TrackDataService interface.
 // It communicates using JSON and can be configured with a custom HTTPClient.
-func NewPlayServiceJSONClient(addr string, client HTTPClient) PlayService {
-	prefix := urlBase(addr) + PlayServicePathPrefix
-	urls := [1]string{
-		prefix + "Play",
+func NewTrackDataServiceJSONClient(addr string, client HTTPClient) TrackDataService {
+	prefix := urlBase(addr) + TrackDataServicePathPrefix
+	urls := [2]string{
+		prefix + "StreamTrackData",
+		prefix + "UploadTrackData",
 	}
 	if httpClient, ok := client.(*http.Client); ok {
-		return &playServiceJSONClient{
+		return &trackDataServiceJSONClient{
 			client: withoutRedirects(httpClient),
 			urls:   urls,
 		}
 	}
-	return &playServiceJSONClient{
+	return &trackDataServiceJSONClient{
 		client: client,
 		urls:   urls,
 	}
 }
 
-func (c *playServiceJSONClient) Play(ctx context.Context, in *UserTrack) (<-chan TrackDataOrError, error) {
-	ctx = ctxsetters.WithPackageName(ctx, "resonate.api.play")
-	ctx = ctxsetters.WithServiceName(ctx, "PlayService")
-	ctx = ctxsetters.WithMethodName(ctx, "Play")
+func (c *trackDataServiceJSONClient) StreamTrackData(ctx context.Context, in *UserTrack) (<-chan TrackDataOrError, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "resonate.api.trackdata")
+	ctx = ctxsetters.WithServiceName(ctx, "TrackDataService")
+	ctx = ctxsetters.WithMethodName(ctx, "StreamTrackData")
 	reqBodyBytes, err := proto.Marshal(in)
 	if err != nil {
 		return nil, clientError("failed to marshal proto request", err)
@@ -201,37 +203,37 @@ func (c *playServiceJSONClient) Play(ctx context.Context, in *UserTrack) (<-chan
 	return respStream, nil
 }
 
-// ==========================
-// PlayService Server Handler
-// ==========================
+// ===============================
+// TrackDataService Server Handler
+// ===============================
 
-type playServiceServer struct {
-	PlayService
+type trackDataServiceServer struct {
+	TrackDataService
 	hooks *twirp.ServerHooks
 }
 
-func NewPlayServiceServer(svc PlayService, hooks *twirp.ServerHooks) TwirpServer {
-	return &playServiceServer{
-		PlayService: svc,
-		hooks:       hooks,
+func NewTrackDataServiceServer(svc TrackDataService, hooks *twirp.ServerHooks) TwirpServer {
+	return &trackDataServiceServer{
+		TrackDataService: svc,
+		hooks:            hooks,
 	}
 }
 
 // writeError writes an HTTP response with a valid Twirp error format, and triggers hooks.
 // If err is not a twirp.Error, it will get wrapped with twirp.InternalErrorWith(err)
-func (s *playServiceServer) writeError(ctx context.Context, resp http.ResponseWriter, err error) {
+func (s *trackDataServiceServer) writeError(ctx context.Context, resp http.ResponseWriter, err error) {
 	writeError(ctx, resp, err, s.hooks)
 }
 
-// PlayServicePathPrefix is used for all URL paths on a twirp PlayService server.
-// Requests are always: POST PlayServicePathPrefix/method
+// TrackDataServicePathPrefix is used for all URL paths on a twirp TrackDataService server.
+// Requests are always: POST TrackDataServicePathPrefix/method
 // It can be used in an HTTP mux to route twirp requests along with non-twirp requests on other routes.
-const PlayServicePathPrefix = "/twirp/resonate.api.play.PlayService/"
+const TrackDataServicePathPrefix = "/twirp/resonate.api.trackdata.TrackDataService/"
 
-func (s *playServiceServer) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (s *trackDataServiceServer) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
-	ctx = ctxsetters.WithPackageName(ctx, "resonate.api.play")
-	ctx = ctxsetters.WithServiceName(ctx, "PlayService")
+	ctx = ctxsetters.WithPackageName(ctx, "resonate.api.trackdata")
+	ctx = ctxsetters.WithServiceName(ctx, "TrackDataService")
 	ctx = ctxsetters.WithResponseWriter(ctx, resp)
 
 	var err error
@@ -249,8 +251,11 @@ func (s *playServiceServer) ServeHTTP(resp http.ResponseWriter, req *http.Reques
 	}
 
 	switch req.URL.Path {
-	case "/twirp/resonate.api.play.PlayService/Play":
-		s.servePlay(ctx, resp, req)
+	case "/twirp/resonate.api.trackdata.TrackDataService/StreamTrackData":
+		s.serveStreamTrackData(ctx, resp, req)
+		return
+	case "/twirp/resonate.api.trackdata.TrackDataService/UploadTrackData":
+		s.serveUploadTrackData(ctx, resp, req)
 		return
 	default:
 		msg := fmt.Sprintf("no handler for path %q", req.URL.Path)
@@ -260,7 +265,7 @@ func (s *playServiceServer) ServeHTTP(resp http.ResponseWriter, req *http.Reques
 	}
 }
 
-func (s *playServiceServer) servePlay(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *trackDataServiceServer) serveStreamTrackData(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	header := req.Header.Get("Content-Type")
 	i := strings.Index(header, ";")
 	if i == -1 {
@@ -268,9 +273,9 @@ func (s *playServiceServer) servePlay(ctx context.Context, resp http.ResponseWri
 	}
 	switch strings.TrimSpace(strings.ToLower(header[:i])) {
 	case "application/json":
-		s.servePlayJSON(ctx, resp, req)
+		s.serveStreamTrackDataJSON(ctx, resp, req)
 	case "application/protobuf":
-		s.servePlayProtobuf(ctx, resp, req)
+		s.serveStreamTrackDataProtobuf(ctx, resp, req)
 	default:
 		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
 		twerr := badRouteError(msg, req.Method, req.URL.Path)
@@ -278,12 +283,12 @@ func (s *playServiceServer) servePlay(ctx context.Context, resp http.ResponseWri
 	}
 }
 
-func (s *playServiceServer) servePlayJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *trackDataServiceServer) serveStreamTrackDataJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 }
 
-func (s *playServiceServer) servePlayProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+func (s *trackDataServiceServer) serveStreamTrackDataProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
 	var err error
-	ctx = ctxsetters.WithMethodName(ctx, "Play")
+	ctx = ctxsetters.WithMethodName(ctx, "StreamTrackData")
 	ctx, err = callRequestRouted(ctx, s.hooks)
 	if err != nil {
 		s.writeError(ctx, resp, err)
@@ -317,7 +322,7 @@ func (s *playServiceServer) servePlayProtobuf(ctx context.Context, resp http.Res
 				panic(r)
 			}
 		}()
-		respContent, err = s.Play(ctx, reqContent)
+		respContent, err = s.StreamTrackData(ctx, reqContent)
 	}()
 
 	if err != nil {
@@ -325,7 +330,7 @@ func (s *playServiceServer) servePlayProtobuf(ctx context.Context, resp http.Res
 		return
 	}
 	if respContent == nil {
-		s.writeError(ctx, resp, twirp.InternalError("received a nil UserTrack and nil error while calling Play. nil responses are not supported"))
+		s.writeError(ctx, resp, twirp.InternalError("received a nil UserTrack and nil error while calling StreamTrackData. nil responses are not supported"))
 		return
 	}
 
@@ -410,11 +415,36 @@ func (s *playServiceServer) servePlayProtobuf(ctx context.Context, resp http.Res
 	callResponseSent(ctx, s.hooks)
 }
 
-func (s *playServiceServer) ServiceDescriptor() ([]byte, int) {
+func (s *trackDataServiceServer) serveUploadTrackData(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveUploadTrackDataJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveUploadTrackDataProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *trackDataServiceServer) serveUploadTrackDataJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+}
+
+func (s *trackDataServiceServer) serveUploadTrackDataProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	s.writeError(ctx, resp, twirp.InternalError("rpc type \"upload\" is not implemented"))
+}
+
+func (s *trackDataServiceServer) ServiceDescriptor() ([]byte, int) {
 	return twirpFileDescriptor0, 0
 }
 
-func (s *playServiceServer) ProtocGenTwirpVersion() string {
+func (s *trackDataServiceServer) ProtocGenTwirpVersion() string {
 	return "v5.3.0"
 }
 
@@ -992,22 +1022,24 @@ func (r *jsonStreamReader) Read(msg proto.Message) error {
 }
 
 var twirpFileDescriptor0 = []byte{
-	// 259 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x90, 0x4f, 0x4b, 0xc3, 0x40,
-	0x10, 0xc5, 0x89, 0xa6, 0x49, 0x33, 0x5a, 0xa5, 0x73, 0x31, 0xfe, 0x39, 0x94, 0x80, 0xd2, 0x53,
-	0x14, 0xfd, 0x00, 0x42, 0xa9, 0x87, 0xdc, 0x4a, 0xa2, 0x17, 0x2f, 0x61, 0x9a, 0xec, 0x21, 0xd8,
-	0x24, 0xcb, 0xee, 0x44, 0xc8, 0x67, 0xf0, 0x4b, 0xcb, 0x4e, 0xa5, 0x08, 0x7a, 0xdb, 0xf7, 0x7b,
-	0x6f, 0x67, 0x78, 0x03, 0x73, 0xa3, 0xab, 0x7b, 0xab, 0xcc, 0x67, 0x53, 0xa9, 0x54, 0x9b, 0x9e,
-	0x7b, 0x9c, 0x1b, 0x65, 0xfb, 0x8e, 0x58, 0xa5, 0xa4, 0x9b, 0x54, 0xef, 0x68, 0x4c, 0x9e, 0x21,
-	0x7a, 0xb3, 0xca, 0xbc, 0x1a, 0xaa, 0x3e, 0xf0, 0x02, 0xc2, 0xc1, 0x2a, 0x53, 0x36, 0x75, 0xec,
-	0x2d, 0xbc, 0x65, 0x94, 0x07, 0x4e, 0x66, 0x35, 0x5e, 0xc2, 0x94, 0x5d, 0xc2, 0x39, 0x47, 0xe2,
-	0x84, 0xa2, 0xb3, 0x3a, 0xf9, 0xf2, 0x20, 0x92, 0xdf, 0x6b, 0x62, 0xc2, 0x3b, 0x38, 0xdf, 0x07,
-	0xdd, 0xe2, 0xdf, 0x93, 0x66, 0x82, 0x0b, 0xa1, 0x59, 0x8d, 0xb7, 0x70, 0x66, 0x99, 0x0c, 0x97,
-	0xba, 0xb7, 0x0d, 0x37, 0x7d, 0x27, 0x63, 0x27, 0xf9, 0x4c, 0xe8, 0xe6, 0x07, 0xe2, 0x35, 0x44,
-	0xdd, 0xd0, 0x96, 0xdb, 0x91, 0x95, 0x8d, 0x8f, 0x25, 0x31, 0xed, 0x86, 0x76, 0xe5, 0x34, 0x22,
-	0xf8, 0x35, 0x31, 0xc5, 0xfe, 0xc2, 0x5b, 0x9e, 0xe6, 0xf2, 0x4e, 0x42, 0x98, 0xbc, 0xb4, 0x9a,
-	0xc7, 0xc7, 0x02, 0x4e, 0x36, 0x3b, 0x1a, 0x8b, 0x7d, 0x7f, 0x5c, 0x83, 0xef, 0x24, 0xde, 0xa4,
-	0x7f, 0x4e, 0x90, 0x1e, 0xfa, 0x5f, 0xfd, 0xe7, 0x1e, 0xba, 0x3d, 0x78, 0xab, 0xe0, 0xdd, 0x77,
-	0x6c, 0x1b, 0xc8, 0x39, 0x9f, 0xbe, 0x03, 0x00, 0x00, 0xff, 0xff, 0x44, 0x3f, 0x28, 0x0e, 0x63,
-	0x01, 0x00, 0x00,
+	// 292 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x91, 0x31, 0x4f, 0xc3, 0x30,
+	0x10, 0x85, 0x65, 0xa0, 0x4d, 0x73, 0x10, 0x02, 0x1e, 0xa0, 0x94, 0xa5, 0x44, 0x2a, 0xca, 0x14,
+	0x10, 0x0c, 0x8c, 0x48, 0x15, 0x0c, 0xdd, 0x50, 0x42, 0x07, 0x90, 0x50, 0xe4, 0x26, 0x1e, 0x22,
+	0x48, 0x6c, 0xd9, 0x97, 0x4a, 0xfd, 0x8f, 0xfc, 0x28, 0x94, 0x2b, 0xb8, 0x0c, 0x80, 0xd8, 0x7c,
+	0xef, 0xbe, 0x77, 0x3e, 0x3f, 0xc3, 0xa1, 0xd1, 0xc5, 0x85, 0x95, 0x66, 0x59, 0x15, 0x32, 0xd1,
+	0x46, 0xa1, 0xe2, 0x47, 0x46, 0x5a, 0xd5, 0x08, 0x94, 0x89, 0xd0, 0x55, 0x82, 0x46, 0x14, 0xaf,
+	0xa5, 0x40, 0x11, 0xdd, 0x82, 0x3f, 0xb7, 0xd2, 0x3c, 0x76, 0x02, 0x3f, 0x06, 0xaf, 0xb5, 0xd2,
+	0xe4, 0x55, 0x39, 0x64, 0x63, 0x16, 0xfb, 0x69, 0xbf, 0x2b, 0x67, 0x25, 0x3f, 0x81, 0x01, 0x59,
+	0xba, 0xce, 0x16, 0x75, 0x3c, 0xaa, 0x67, 0x65, 0x74, 0x03, 0x01, 0x99, 0x33, 0x69, 0x96, 0xc4,
+	0x9e, 0x43, 0xb8, 0x66, 0x2d, 0x29, 0x9b, 0x61, 0x01, 0x7e, 0xe7, 0xa2, 0x02, 0x7c, 0x32, 0xde,
+	0x09, 0x14, 0x7c, 0x02, 0xfb, 0x16, 0x85, 0xc1, 0x5c, 0x2b, 0x5b, 0x61, 0xa5, 0x1a, 0xf2, 0xf4,
+	0xd2, 0x80, 0xd4, 0x87, 0x4f, 0x91, 0x9f, 0x82, 0xdf, 0xb4, 0x75, 0xbe, 0x58, 0xa1, 0xb4, 0xb4,
+	0x48, 0x2f, 0x1d, 0x34, 0x6d, 0x3d, 0xed, 0x6a, 0xce, 0x61, 0xa7, 0x7b, 0xd2, 0x70, 0x7b, 0xcc,
+	0xe2, 0xbd, 0x94, 0xce, 0x91, 0x07, 0xbd, 0xfb, 0x5a, 0xe3, 0xea, 0xea, 0x9d, 0xc1, 0x81, 0xbb,
+	0x2e, 0x5b, 0x47, 0xc3, 0x9f, 0x20, 0xcc, 0xd0, 0x48, 0x51, 0x6f, 0x16, 0x39, 0x4b, 0x7e, 0x0e,
+	0x2a, 0x71, 0x29, 0x8d, 0x7e, 0x45, 0xdc, 0x94, 0x4b, 0xc6, 0x5f, 0x20, 0x9c, 0xeb, 0x37, 0x25,
+	0xca, 0x7f, 0x8c, 0x76, 0xc8, 0x68, 0xf2, 0x27, 0xf2, 0x15, 0x5d, 0xcc, 0xa6, 0xbb, 0xcf, 0xbe,
+	0x6b, 0x2e, 0xfa, 0xf4, 0xc5, 0xd7, 0x1f, 0x01, 0x00, 0x00, 0xff, 0xff, 0xa3, 0x8e, 0xbe, 0x7c,
+	0xf7, 0x01, 0x00, 0x00,
 }

@@ -93,14 +93,14 @@
   version = "v1.2.0"
 
 [[projects]]
+  branch = "v6_streams_alpha"
   name = "github.com/twitchtv/twirp"
   packages = [
     ".",
     "ctxsetters",
     "internal/contextkeys"
   ]
-  revision = "1e149ba374383a4b74e836f6c9e54fede6b09c61"
-  version = "v5.3.0"
+  revision = "c1dacbaed519a06890ebdcdcd392b885694405af"
 
 [[projects]]
   branch = "master"
@@ -151,6 +151,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "dfa2dbf2281e26ba59e83720f44498fa46b57e7e7f7865b65f4114870eab6ec3"
+  inputs-digest = "b461502f9babe64983ca22c0b3937d79379b53e8b751b641d380691d9debc50c"
   solver-name = "gps-cdcl"
   solver-version = 1

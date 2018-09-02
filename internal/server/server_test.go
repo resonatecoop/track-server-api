@@ -1,12 +1,10 @@
-package playserver_test
+package trackdataserver_test
 
 import (
 	"context"
 
-	"github.com/go-pg/pg"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	uuid "github.com/satori/go.uuid"
 	"github.com/twitchtv/twirp"
 
 	pb "track-server-api/rpc"
@@ -21,12 +19,12 @@ var _ = Describe("Play server", func() {
 		Context("with valid track and user uuid", func() {
 			It("should respond with track stream if track exists", func() {
 				userTrackPB := &pb.UserTrack{TrackId: "0", UserId: "0"}
-				resp, err := service.Play(context.Background(), userTrackPB)
+				_, err := service.Play(context.Background(), userTrackPB)
 				Expect(err).NotTo(HaveOccurred())
 			})
 			It("should respond with not_found error if track does not exist", func() {
 				userTrackPB := &pb.UserTrack{TrackId: "0", UserId: "0"}
-				resp, err := service.Play(context.Background(), userTrackPB)
+				_, err := service.Play(context.Background(), userTrackPB)
 				Expect(err).To(HaveOccurred())
 				twerr := err.(twirp.Error)
 				Expect(twerr.Code()).To(Equal(not_found_code))

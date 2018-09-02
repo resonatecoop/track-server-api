@@ -1,4 +1,4 @@
-package playserver
+package trackdataserver
 
 import (
 	"context"
@@ -8,16 +8,20 @@ import (
 
 	pb "track-server-api/rpc"
 	track_pb "user-api/rpc/track"
+
+	"github.com/go-pg/pg"
+	"github.com/twitchtv/twirp"
 )
 
-// Server implements the PlayService
+// Server implements the TrackDataService
 type Server struct {
+	db *pg.DB
 }
 
 // NewServer creates an instance of our server
-func NewServer() *Server {
+func NewServer(db *pg.DB) *Server {
 	fmt.Printf("new server")
-	return &Server{}
+	return &Server{db: db}
 }
 
 // Request a track stream
@@ -27,9 +31,14 @@ func (server *Server) Play(ctx context.Context, userTrackPB *pb.UserTrack) (<-ch
 
 	trackClient := track_pb.NewTrackServiceProtobufClient("http://localhost:8080", &http.Client{})
 
-	track, err := trackClient.GetTrack(context.Background(), &track_pb.Track{Id: userTrackPB.TrackId})
+	track := &track_pb.Track{Id: userTrackPB.TrackId}
+	tracks := &track_pb.TracksList{Tracks: []*track_pb.Track{track}}
+	res, err := trackClient.GetTracks(context.Background(), tracks)
 	if err != nil {
 		return nil, err
+	}
+	if len(res.Tracks) == 0 {
+		return nil, twirp.InvalidArgumentError("track id", "must be a valid track id")
 	}
 
 	sc, err := openConnection()
@@ -40,20 +49,19 @@ func (server *Server) Play(ctx context.Context, userTrackPB *pb.UserTrack) (<-ch
 	const bytesPerRead = 12000 // temporary fake value
 
 	trackData := &pb.TrackData{
-		TrackServerId: track.TrackServerId,
 		StartPosition: 0,
-		NumBytes: bytesPerRead,
+		NumBytes:      bytesPerRead,
 	}
 
-	ch := make(chan pb.TrackDataOrError,bytesPerRead)
-	go func () {
+	ch := make(chan pb.TrackDataOrError, bytesPerRead)
+	go func() {
 		defer close(ch)
 		for {
-			td, err := getTrackData(trackData, sc)
+			td, err := getTrackData(res.Tracks[0].TrackServerId, trackData, sc)
 			select {
 			case <-ctx.Done():
 				return
-			case ch <- pb.TrackDataOrError{Msg:td, Err:err}:
+			case ch <- pb.TrackDataOrError{Msg: td, Err: err}:
 			}
 			time.Sleep(5000 * time.Millisecond)
 			td.StartPosition += bytesPerRead
@@ -64,4 +72,3 @@ func (server *Server) Play(ctx context.Context, userTrackPB *pb.UserTrack) (<-ch
 
 	return ch, nil
 }
-
