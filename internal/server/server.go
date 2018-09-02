@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/twitchtv/twirp"
+
 	pb "track-server-api/rpc"
 	track_pb "user-api/rpc/track"
 
 	"github.com/go-pg/pg"
-	"github.com/twitchtv/twirp"
 )
 
 // Server implements the TrackDataService
@@ -25,7 +26,7 @@ func NewServer(db *pg.DB) *Server {
 }
 
 // Request a track stream
-func (server *Server) Play(ctx context.Context, userTrackPB *pb.UserTrack) (<-chan pb.TrackDataOrError, error) {
+func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserTrack) (<-chan pb.TrackDataOrError, error) {
 
 	// Get track object for TrackServerID and CreatorID
 
@@ -38,7 +39,7 @@ func (server *Server) Play(ctx context.Context, userTrackPB *pb.UserTrack) (<-ch
 		return nil, err
 	}
 	if len(res.Tracks) == 0 {
-		return nil, twirp.InvalidArgumentError("track id", "must be a valid track id")
+		return nil, twirp.NotFoundError("track id not found")
 	}
 
 	sc, err := openConnection()

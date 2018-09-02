@@ -11,14 +11,22 @@ import (
 func init() {
 	migrations.Register(func(db migrations.DB) error {
 		fmt.Println("creating table track_data...")
-		if _, err := orm.CreateTable(db, &models.TrackData{}, nil); err != nil {
+		options := &orm.CreateTableOptions{
+			FKConstraints: true,
+			IfNotExists:   true,
+		}
+		if _, err := orm.CreateTable(db, &models.TrackData{}, options); err != nil {
 			fmt.Println("err %v", err)
 			return err
 		}
 		return nil
 	}, func(db migrations.DB) error {
 		fmt.Println("dropping table track_data...")
-		if _, err := orm.DropTable(db, &models.TrackData{}, nil); err != nil {
+		options := &orm.DropTableOptions{
+			IfExists: true,
+			Cascade:  true,
+		}
+		if _, err := orm.DropTable(db, &models.TrackData{}, options); err != nil {
 			fmt.Println("err %v", err)
 			return err
 		}
