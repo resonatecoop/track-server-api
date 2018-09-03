@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"time"
 
+	config "track-server-api/config"
 	pb "track-server-api/rpc"
 )
 
@@ -18,51 +20,57 @@ type StorageConnection struct {
 	ApiUrl             string `json:"apiUrl"`
 	AuthorizationToken string `json:"authorizationToken"`
 	DownloadUrl        string `json:"downloadUrl"`
-	MinimumPartSize    string `json:"minimumPartSize"`
+	MinimumPartSize    int    `json:"minimumPartSize"`
 }
 
 func OpenStorageConnection() (*StorageConnection, error) {
+
 	var client = &http.Client{Timeout: 5 * time.Second}
+	req, err := http.NewRequest("GET", config.StorageConfig.AuthEndpoint, nil)
+	req.SetBasicAuth(config.StorageConfig.AccountId, config.StorageConfig.Key)
 
-	url := fmt.Sprintf("https://api.backblazeb2.com/b2api/v1/b2_authorize_account -u \"%d:%d\"", 1, 2)
-
-	req, err := http.NewRequest("GET", url, nil)
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
-
 	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		msg := fmt.Sprintf("HTTP error %d while opening storage connection", resp.StatusCode)
 		err := errors.New(msg)
 		return nil, err
 	}
 
-	sc := &StorageConnection{}
-	err = json.NewDecoder(resp.Body).Decode(sc)
+	var sc = new(StorageConnection)
+	err = json.Unmarshal(body, &sc)
 	if err != nil {
 		return nil, err
 	}
+
 	return sc, nil
 }
 
-func GetTrackChunkFromStorage(trackServerId string, trackChunkPB *pb.TrackChunk, sc *StorageConnection) (*pb.TrackChunk, error) {
-	endpoint := fmt.Sprintf("/b2api/v1/b2_download_file_by_id?fileId=\"%s\"", trackServerId)
-	url := fmt.Sprintf("%s/%s", endpoint, trackServerId)
-	rangeMsg := fmt.Sprintf("%d-%d", 0, trackChunkPB.NumBytes)
+func GetTrackChunkFromStorage(storageId string, trackChunkPB *pb.TrackChunk, sc *StorageConnection) (*pb.TrackChunk, error) {
 
-	var client = &http.Client{Timeout: 5 * time.Second}
-	println(url)
-	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Set("AuthorizationToken", sc.AuthorizationToken)
+	endpoint := fmt.Sprintf("%s%s%s", sc.DownloadUrl, config.StorageConfig.FileEndpoint, storageId)
+	rangeMsg := fmt.Sprintf("bytes=%d-%d", trackChunkPB.StartPosition, trackChunkPB.StartPosition+trackChunkPB.NumBytes-1)
+
+	var client = &http.Client{Timeout: 15 * time.Second}
+	req, err := http.NewRequest("GET", endpoint, nil)
+	req.Header.Set("Authorization", sc.AuthorizationToken)
 	req.Header.Set("Range", rangeMsg)
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusPartialContent {
 		msg := fmt.Sprintf("HTTP error %d while getting track data from storage", resp.StatusCode)
 		err := errors.New(msg)
 		return nil, err

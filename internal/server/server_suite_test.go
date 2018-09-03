@@ -31,7 +31,28 @@ var _ = BeforeSuite(func() {
 	db = database.Connect(testing)
 	service = trackdataserver.NewServer(db)
 
-	newTrackData = &models.TrackData{TrackId: uuid.NewV4(), UserId: uuid.NewV4()}
+	// How will we do multi-API setup? ??
+
+	//trackClient := track_pb.NewTrackServiceProtobufClient("http://localhost:8080", &http.Client{})
+	//userClient := user_pb.NewUserServiceProtobufClient("http://localhost:8080", &http.Client{})
+
+	// newTrack := &track_pb.Track{
+	// 	Title:       "track title",
+	// 	Status:      "free",
+	// 	CreatorId:   "b86517a0-afba-41ca-820b-a4f6599d0edb",
+	// 	UserGroupId: uuid.NewV4().String(),
+	// 	TrackNumber: 1,
+	// }
+	// newTrack, err := trackClient.CreateTrack(context.Background(), newTrack)
+	// Expect(err).NotTo(HaveOccurred())
+
+	// newTrackId, err := internal.GetUuidFromString(newTrack.Id)
+
+	newTrackData = &models.TrackData{
+		TrackId:   uuid.NewV4(),
+		UserId:    uuid.NewV4(),
+		StorageId: "4_z134ab1f7e45796cc6950011e_f117076c66da42a22_d20180903_m010708_c002_v0001108_t0017",
+	}
 	err := db.Insert(newTrackData)
 	Expect(err).NotTo(HaveOccurred())
 })

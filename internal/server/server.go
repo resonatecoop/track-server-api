@@ -2,16 +2,13 @@ package trackdataserver
 
 import (
 	"context"
-	"fmt"
-	"net/http"
 	"time"
 
 	uuid "github.com/satori/go.uuid"
-	"github.com/twitchtv/twirp"
 
+	"track-server-api/internal"
 	"track-server-api/internal/database/models"
 	pb "track-server-api/rpc"
-	track_pb "user-api/rpc/track"
 
 	"github.com/go-pg/pg"
 )
@@ -23,25 +20,37 @@ type Server struct {
 
 // NewServer creates an instance of our server
 func NewServer(db *pg.DB) *Server {
-	fmt.Printf("new server")
+	//fmt.Printf("new server")
 	return &Server{db: db}
 }
 
 // Request a track stream
 func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserTrack) (<-chan pb.TrackChunkOrError, error) {
 
-	// Get track object for TrackServerID and CreatorID
+	// Get Track from TrackService for CreatorID
 
-	trackClient := track_pb.NewTrackServiceProtobufClient("http://localhost:8080", &http.Client{})
+	// How will we do multi-API setup for testing? ??
 
-	track := &track_pb.Track{Id: userTrackPB.TrackId}
-	tracks := &track_pb.TracksList{Tracks: []*track_pb.Track{track}}
-	res, err := trackClient.GetTracks(context.Background(), tracks)
-	if err != nil {
-		return nil, err
+	// trackClient := track_pb.NewTrackServiceProtobufClient("http://localhost:8080", &http.Client{})
+	// track := &track_pb.Track{Id: userTrackPB.TrackId}
+	// tracks := &track_pb.TracksList{Tracks: []*track_pb.Track{track}}
+	// res, err := trackClient.GetTracks(context.Background(), tracks)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// if len(res.Tracks) == 0 {
+	// 	return nil, twirp.NotFoundError("track id not found")
+	// }
+
+	trackId, twerr := internal.GetUuidFromString(userTrackPB.TrackId)
+	if twerr != nil {
+		return nil, twerr
 	}
-	if len(res.Tracks) == 0 {
-		return nil, twirp.NotFoundError("track id not found")
+
+	trackData := &models.TrackData{TrackId: trackId}
+	pgerr := server.db.Model(trackData).Where("track_id = ?", trackId).Select()
+	if pgerr != nil {
+		return nil, internal.CheckError(pgerr, "track_data")
 	}
 
 	sc, err := OpenStorageConnection()
@@ -56,11 +65,14 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 		NumBytes:      bytesPerRead,
 	}
 
+	//fmt.Printf("+++ %v\n", trackId)
+	//fmt.Printf("+++ %v\n", trackData)
+
 	ch := make(chan pb.TrackChunkOrError, bytesPerRead)
 	go func() {
 		defer close(ch)
 		for {
-			td, err := GetTrackChunkFromStorage(res.Tracks[0].TrackServerId, trackChunk, sc)
+			td, err := GetTrackChunkFromStorage(trackData.StorageId, trackChunk, sc)
 			select {
 			case <-ctx.Done():
 				return

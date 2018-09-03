@@ -11,6 +11,7 @@ type TrackData struct {
 	CreatedAt time.Time `sql:"default:now()"`
 	UserId    uuid.UUID `sql:"type:uuid,notnull"`
 	TrackId   uuid.UUID `sql:"type:uuid,notnull"`
+	StorageId string
 	Type      int
 	Credits   float32
 }
