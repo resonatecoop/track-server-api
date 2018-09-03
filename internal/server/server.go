@@ -78,8 +78,8 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 				return
 			case ch <- pb.TrackChunkOrError{Msg: td, Err: err}:
 			}
-			time.Sleep(5000 * time.Millisecond)
-			td.StartPosition += bytesPerRead
+			time.Sleep(1000 * time.Millisecond)
+			trackChunk.StartPosition += bytesPerRead
 		}
 	}()
 
@@ -89,9 +89,13 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 }
 
 // Upload a track stream
-func (server *Server) UploadTrackData(ctx context.Context, trackChunks <-chan pb.TrackChunkOrError) (*pb.TrackServerId, error) {
+func (server *Server) UploadTrackData(ctx context.Context, trackChunk *pb.TrackChunk) (*pb.TrackServerId, error) {
 
-	newTrackData := &models.TrackData{TrackId: uuid.NewV4(), UserId: uuid.NewV4()}
+	newTrackData := &models.TrackData{
+		TrackId:   uuid.NewV4(),
+		UserId:    uuid.NewV4(),
+		StorageId: "4_z134ab1f7e45796cc6950011e_f117076c66da42a22_d20180903_m010708_c002_v0001108_t0017",
+	}
 	err := server.db.Insert(newTrackData)
 	if err != nil {
 		return nil, err

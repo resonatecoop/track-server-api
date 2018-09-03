@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"track-server-api/internal/database"
 	trackDataServer "track-server-api/internal/server"
 	rpc "track-server-api/rpc"
 
@@ -23,15 +24,17 @@ func WithURLQuery(base http.Handler) http.Handler {
 }
 
 func main() {
-	fmt.Printf("TrackData Service on :8081")
-
-	newTrackDataServer := trackDataServer.NewServer()
-	trackDataTwirpHandler := rpc.NewTrackDataServiceServer(newTrackDataServer, nil)
+	testing := true
+	db := database.Connect(testing)
+	server := trackDataServer.NewServer(db)
+	trackDataTwirpHandler := WithURLQuery(rpc.NewTrackDataServiceServer(server, nil))
 
 	mux := http.NewServeMux()
 	mux.Handle(rpc.TrackDataServicePathPrefix, trackDataTwirpHandler)
 
 	handler := cors.Default().Handler(mux)
+
+	fmt.Printf("TrackData Service on :8081")
 
 	http.ListenAndServe(":8081", handler)
 }

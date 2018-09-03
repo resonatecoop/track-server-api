@@ -5,7 +5,7 @@ option go_package = "trackdata";
 
 service TrackDataService {
   rpc StreamTrackData(UserTrack) returns (stream TrackChunk);
-  rpc UploadTrackData(stream TrackChunk) returns (TrackServerId);
+  rpc UploadTrackData(TrackChunk) returns (TrackServerId);
 }
 
 message UserTrack {

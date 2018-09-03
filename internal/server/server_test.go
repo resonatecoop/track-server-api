@@ -2,6 +2,7 @@ package trackdataserver_test
 
 import (
 	"context"
+	"fmt"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -25,8 +26,11 @@ var _ = Describe("Track data server", func() {
 			})
 			It("should respond with not_found error if track does not exist", func() {
 				userTrackPB := &pb.UserTrack{TrackId: uuid.NewV4().String(), UserId: uuid.NewV4().String()}
-				_, err := service.StreamTrackData(context.Background(), userTrackPB)
+				resp, err := service.StreamTrackData(context.Background(), userTrackPB)
 				Expect(err).To(HaveOccurred())
+
+				fmt.Printf("resp %v\n", resp)
+
 				// twerr := err.(twirp.Error)
 				// Expect(twerr.Code()).To(Equal(not_found_code))
 			})
