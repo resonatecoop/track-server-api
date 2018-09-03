@@ -3,6 +3,7 @@ package trackdataserver
 import (
 	"bufio"
 	"bytes"
+	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,6 +22,16 @@ type StorageConnection struct {
 	AuthorizationToken string `json:"authorizationToken"`
 	DownloadUrl        string `json:"downloadUrl"`
 	MinimumPartSize    int    `json:"minimumPartSize"`
+}
+
+type UploadUrl struct {
+	BucketId           string `json:"bucketID"`
+	UploadUrl          string `json:uploadUrl`
+	AuthorizationToken string `json:authorizationToken`
+}
+
+type StorageFileInfo struct {
+	FileId string `json:"fileId"`
 }
 
 func OpenStorageConnection() (*StorageConnection, error) {
@@ -91,4 +102,80 @@ func GetTrackChunkFromStorage(storageId string, trackChunkPB *pb.TrackChunk, sc 
 	td.Data = b.Bytes()
 	td.NumBytes = int32(written)
 	return td, nil
+}
+
+func GetUploadUrl(sc *StorageConnection) (*UploadUrl, error) {
+
+	var client = &http.Client{Timeout: 5 * time.Second}
+
+	endpoint := fmt.Sprintf("%s%s", sc.ApiUrl, config.StorageConfig.UploadEndpoint)
+	s := fmt.Sprintf(`{"bucketId": "%s"}`, config.StorageConfig.BucketId)
+	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer([]byte(s)))
+	req.Header.Set("Authorization", sc.AuthorizationToken)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		msg := fmt.Sprintf("HTTP error %d while getting upload URL", resp.StatusCode)
+		err := errors.New(msg)
+		return nil, err
+	}
+
+	var uploadURL = new(UploadUrl)
+	err = json.Unmarshal(body, &uploadURL)
+	if err != nil {
+		return nil, err
+	}
+
+	return uploadURL, nil
+}
+
+func UploadTrackToStorage(trackChunkPB *pb.TrackChunk, uploadUrl *UploadUrl, sc *StorageConnection) (*StorageFileInfo, error) {
+
+	var client = &http.Client{Timeout: 25 * time.Second} // with large upload this timeout has to be big enough...
+
+	h := sha1.New()
+	h.Write(trackChunkPB.Data)
+	sha := fmt.Sprintf("%x", h.Sum(nil))
+
+	req, err := http.NewRequest("POST", uploadUrl.UploadUrl, bytes.NewBuffer(trackChunkPB.Data))
+	req.Header.Set("Authorization", uploadUrl.AuthorizationToken)
+	req.Header.Set("X-Bz-File-Name", "testfile")
+	req.Header.Set("Content-Type", "audio/aac")
+	req.Header.Set("X-Bz-Content-Sha1", sha)
+	req.Header.Set("X-Bz-Info-Author", "unknown")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		msg := fmt.Sprintf("HTTP error %d while getting upload URL", resp.StatusCode)
+		err := errors.New(msg)
+		return nil, err
+	}
+
+	var fileInfo = new(StorageFileInfo)
+	err = json.Unmarshal(body, &fileInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	return fileInfo, nil
 }

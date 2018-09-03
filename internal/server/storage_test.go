@@ -1,6 +1,9 @@
 package trackdataserver_test
 
 import (
+	"fmt"
+	"io/ioutil"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/twitchtv/twirp"
@@ -19,6 +22,46 @@ var _ = Describe("Track data server", func() {
 			It("should return a StorageConnection", func() {
 				_, err := trackdataserver.OpenStorageConnection()
 				Expect(err).NotTo(HaveOccurred())
+			})
+		})
+	})
+	Describe("getUploadURL", func() {
+		Context("with valid StorageConnection", func() {
+			It("should return an uploadURL", func() {
+				sc, err := trackdataserver.OpenStorageConnection()
+				Expect(err).NotTo(HaveOccurred())
+
+				uploadUrl, err := trackdataserver.GetUploadUrl(sc)
+				Expect(err).NotTo(HaveOccurred())
+
+				fmt.Printf("upload url: %v\n", uploadUrl)
+			})
+		})
+	})
+	Describe("uploadTrack", func() {
+		Context("with valid StorageConnection and uploadUrl", func() {
+			It("should return an StorageId", func() {
+				sc, err := trackdataserver.OpenStorageConnection()
+				Expect(err).NotTo(HaveOccurred())
+
+				uploadUrl, err := trackdataserver.GetUploadUrl(sc)
+				Expect(err).NotTo(HaveOccurred())
+				fmt.Printf("uploading to: %v\n", uploadUrl)
+
+				dat, err := ioutil.ReadFile("/Users/jhno/Desktop/bendy_13s.mp4")
+				Expect(err).NotTo(HaveOccurred())
+
+				fmt.Printf("sending size: %d\n", len(dat))
+
+				tc := &pb.TrackChunk{
+					StartPosition: 0,
+					NumBytes:      int32(len(dat)),
+					Data:          dat,
+				}
+				s, err := trackdataserver.UploadTrackToStorage(tc, uploadUrl, sc)
+				Expect(err).NotTo(HaveOccurred())
+
+				fmt.Printf("got storage: %v\n", s)
 			})
 		})
 	})
@@ -59,10 +102,6 @@ var _ = Describe("Track data server", func() {
 
 				trackChunk, err = trackdataserver.GetTrackChunkFromStorage(storageId, trackChunk, sc)
 				Expect(err).To(HaveOccurred())
-			})
-		})
-		Context("with invalid user uuid", func() {
-			It("should respond with invalid_argument error", func() {
 			})
 		})
 	})

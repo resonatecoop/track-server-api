@@ -9,10 +9,12 @@ func init() {
 	TestingConfig := db_config{addr, "resonate_testing_user", "", "resonate_testing"}
 
 	StorageConfig = &storage_config{
-		"3a17476c901e",
-		"00257352ce3d0c8db20fdd511881f1e5e2508269ad",
-		"https://api.backblazeb2.com/b2api/v1/b2_authorize_account",
-		"/b2api/v1/b2_download_file_by_id?fileId=",
+		AccountId:      "3a17476c901e",
+		Key:            "00257352ce3d0c8db20fdd511881f1e5e2508269ad",
+		AuthEndpoint:   "https://api.backblazeb2.com/b2api/v1/b2_authorize_account",
+		FileEndpoint:   "/b2api/v1/b2_download_file_by_id?fileId=",
+		UploadEndpoint: "/b2api/v1/b2_get_upload_url",
+		BucketId:       "134ab1f7e45796cc6950011e",
 	}
 
 	Config = &config{TestingConfig, DevConfig}
@@ -31,8 +33,10 @@ type config struct {
 }
 
 type storage_config struct {
-	AccountId    string
-	Key          string
-	AuthEndpoint string
-	FileEndpoint string
+	AccountId      string
+	Key            string
+	AuthEndpoint   string
+	FileEndpoint   string
+	UploadEndpoint string
+	BucketId       string
 }

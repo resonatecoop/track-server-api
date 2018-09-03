@@ -58,7 +58,7 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 		return nil, err
 	}
 
-	const bytesPerRead = 12000 // temporary fake value
+	const bytesPerRead = 60000 // this is bytes per 5 seconds at 96kbps - really small! 
 
 	trackChunk := &pb.TrackChunk{
 		StartPosition: 0,
@@ -78,7 +78,7 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 				return
 			case ch <- pb.TrackChunkOrError{Msg: td, Err: err}:
 			}
-			time.Sleep(1000 * time.Millisecond)
+			time.Sleep(5000 * time.Millisecond)
 			trackChunk.StartPosition += bytesPerRead
 		}
 	}()
@@ -91,6 +91,7 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 // Upload a track stream
 func (server *Server) UploadTrackData(ctx context.Context, trackChunk *pb.TrackChunk) (*pb.TrackServerId, error) {
 
+	
 	newTrackData := &models.TrackData{
 		TrackId:   uuid.NewV4(),
 		UserId:    uuid.NewV4(),
