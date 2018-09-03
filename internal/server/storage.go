@@ -21,7 +21,7 @@ type StorageConnection struct {
 	MinimumPartSize    string `json:"minimumPartSize"`
 }
 
-func openConnection() (*StorageConnection, error) {
+func OpenStorageConnection() (*StorageConnection, error) {
 	var client = &http.Client{Timeout: 5 * time.Second}
 
 	url := fmt.Sprintf("https://api.backblazeb2.com/b2api/v1/b2_authorize_account -u \"%d:%d\"", 1, 2)
@@ -47,13 +47,13 @@ func openConnection() (*StorageConnection, error) {
 	return sc, nil
 }
 
-func getTrackData(trackServerId string, trackDataPB *pb.TrackData, sc *StorageConnection) (*pb.TrackData, error) {
+func GetTrackChunkFromStorage(trackServerId string, trackChunkPB *pb.TrackChunk, sc *StorageConnection) (*pb.TrackChunk, error) {
 	endpoint := fmt.Sprintf("/b2api/v1/b2_download_file_by_id?fileId=\"%s\"", trackServerId)
 	url := fmt.Sprintf("%s/%s", endpoint, trackServerId)
-	rangeMsg := fmt.Sprintf("%d-%d", 0, trackDataPB.NumBytes)
+	rangeMsg := fmt.Sprintf("%d-%d", 0, trackChunkPB.NumBytes)
 
 	var client = &http.Client{Timeout: 5 * time.Second}
-
+	println(url)
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("AuthorizationToken", sc.AuthorizationToken)
 	req.Header.Set("Range", rangeMsg)
@@ -68,8 +68,8 @@ func getTrackData(trackServerId string, trackDataPB *pb.TrackData, sc *StorageCo
 		return nil, err
 	}
 
-	td := &pb.TrackData{
-		StartPosition: trackDataPB.StartPosition,
+	td := &pb.TrackChunk{
+		StartPosition: trackChunkPB.StartPosition,
 	}
 
 	var b bytes.Buffer

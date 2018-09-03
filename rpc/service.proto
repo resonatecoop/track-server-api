@@ -4,8 +4,8 @@ package resonate.api.trackdata;
 option go_package = "trackdata";
 
 service TrackDataService {
-  rpc StreamTrackData(UserTrack) returns (stream TrackData);
-  rpc UploadTrackData(stream TrackData) returns (TrackServerId);
+  rpc StreamTrackData(UserTrack) returns (stream TrackChunk);
+  rpc UploadTrackData(stream TrackChunk) returns (TrackServerId);
 }
 
 message UserTrack {
@@ -17,7 +17,7 @@ message TrackServerId {
   string track_server_id = 1;
 }
 
-message TrackData {
+message TrackChunk {
   int32 start_position = 1;
   int32 num_bytes = 2;
   bytes data = 3;
