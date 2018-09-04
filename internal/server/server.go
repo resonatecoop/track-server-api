@@ -2,6 +2,7 @@ package trackdataserver
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	uuid "github.com/satori/go.uuid"
@@ -58,7 +59,7 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 		return nil, err
 	}
 
-	const bytesPerRead = 60000 // this is bytes per 5 seconds at 96kbps - really small! 
+	const bytesPerRead = 60000 // this is bytes per 5 seconds at 96kbps - really small!
 
 	trackChunk := &pb.TrackChunk{
 		StartPosition: 0,
@@ -90,14 +91,31 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 
 // Upload a track stream
 func (server *Server) UploadTrackData(ctx context.Context, trackChunk *pb.TrackChunk) (*pb.TrackServerId, error) {
+	sc, err := OpenStorageConnection()
+	if err != nil {
+		return nil, err
+	}
 
-	
+	uploadUrl, err := GetUploadUrl(sc)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("uploading to: %v\n", uploadUrl)
+	fmt.Printf("sending size: %d\n", len(trackChunk.Data))
+
+	storageFileInfo, err := UploadTrackToStorage(trackChunk, uploadUrl, sc)
+	if err != nil {
+		return nil, err
+	}
+
 	newTrackData := &models.TrackData{
 		TrackId:   uuid.NewV4(),
 		UserId:    uuid.NewV4(),
-		StorageId: "4_z134ab1f7e45796cc6950011e_f117076c66da42a22_d20180903_m010708_c002_v0001108_t0017",
+		StorageId: storageFileInfo.FileId,
 	}
-	err := server.db.Insert(newTrackData)
+
+	err = server.db.Insert(newTrackData)
 	if err != nil {
 		return nil, err
 	}
