@@ -10,6 +10,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/twitchtv/twirp"
 
+	trackdataserver "track-server-api/internal/server"
 	pb "track-server-api/rpc"
 )
 
@@ -22,8 +23,18 @@ var _ = Describe("Track data server", func() {
 		Context("with valid track and user uuid", func() {
 			It("should respond with track stream if track exists", func() {
 				userTrackPB := &pb.UserTrack{TrackId: newTrackData.TrackId.String(), UserId: newTrackData.UserId.String()}
-				_, err := service.StreamTrackData(context.Background(), userTrackPB)
+				trackDataStream, err := service.StreamTrackData(context.Background(), userTrackPB)
 				Expect(err).NotTo(HaveOccurred())
+				count := 0
+				for tdOrErr := range trackDataStream {
+					Expect(tdOrErr.Err).NotTo(HaveOccurred())
+					td := tdOrErr.Msg
+					Expect(td.StartPosition).To(Equal(trackdataserver.BytesPerRead * int32(count)))
+					Expect(td.NumBytes).NotTo(Equal(0))
+					fmt.Printf("%d Streaming data at pos:%v len:%v\n", count, td.StartPosition, td.NumBytes)
+					count += 1
+				}
+				Expect(count).To(Equal(2)) // number of 60000 byte chunks in test file
 			})
 			It("should respond with not_found error if track does not exist", func() {
 				userTrackPB := &pb.UserTrack{TrackId: uuid.NewV4().String(), UserId: uuid.NewV4().String()}

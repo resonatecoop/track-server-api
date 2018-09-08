@@ -36,7 +36,7 @@ type StorageFileInfo struct {
 
 func OpenStorageConnection() (*StorageConnection, error) {
 
-	var client = &http.Client{Timeout: 5 * time.Second}
+	var client = &http.Client{Timeout: config.StorageConfig.Timeout * time.Second}
 	req, err := http.NewRequest("GET", config.StorageConfig.AuthEndpoint, nil)
 	req.SetBasicAuth(config.StorageConfig.AccountId, config.StorageConfig.Key)
 
@@ -71,7 +71,7 @@ func GetTrackChunkFromStorage(storageId string, trackChunkPB *pb.TrackChunk, sc 
 	endpoint := fmt.Sprintf("%s%s%s", sc.DownloadUrl, config.StorageConfig.FileEndpoint, storageId)
 	rangeMsg := fmt.Sprintf("bytes=%d-%d", trackChunkPB.StartPosition, trackChunkPB.StartPosition+trackChunkPB.NumBytes-1)
 
-	var client = &http.Client{Timeout: 15 * time.Second}
+	var client = &http.Client{Timeout: config.StorageConfig.Timeout * time.Second}
 	req, err := http.NewRequest("GET", endpoint, nil)
 	req.Header.Set("Authorization", sc.AuthorizationToken)
 	req.Header.Set("Range", rangeMsg)
@@ -82,6 +82,9 @@ func GetTrackChunkFromStorage(storageId string, trackChunkPB *pb.TrackChunk, sc 
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusPartialContent {
+		if resp.StatusCode == http.StatusRequestedRangeNotSatisfiable {
+			return nil, io.EOF
+		}
 		msg := fmt.Sprintf("HTTP error %d while getting track data from storage", resp.StatusCode)
 		err := errors.New(msg)
 		return nil, err
@@ -106,7 +109,7 @@ func GetTrackChunkFromStorage(storageId string, trackChunkPB *pb.TrackChunk, sc 
 
 func GetUploadUrl(sc *StorageConnection) (*UploadUrl, error) {
 
-	var client = &http.Client{Timeout: 5 * time.Second}
+	var client = &http.Client{Timeout: config.StorageConfig.Timeout * time.Second}
 
 	endpoint := fmt.Sprintf("%s%s", sc.ApiUrl, config.StorageConfig.UploadEndpoint)
 	s := fmt.Sprintf(`{"bucketId": "%s"}`, config.StorageConfig.BucketId)
@@ -141,7 +144,7 @@ func GetUploadUrl(sc *StorageConnection) (*UploadUrl, error) {
 
 func UploadTrackToStorage(trackChunkPB *pb.TrackChunk, uploadUrl *UploadUrl, sc *StorageConnection) (*StorageFileInfo, error) {
 
-	var client = &http.Client{Timeout: 25 * time.Second} // with large upload this timeout has to be big enough...
+	var client = &http.Client{Timeout: config.StorageConfig.Timeout * time.Second} // with large upload this timeout has to be big enough...
 
 	h := sha1.New()
 	h.Write(trackChunkPB.Data)

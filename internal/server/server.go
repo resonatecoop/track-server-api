@@ -3,6 +3,7 @@ package trackdataserver
 import (
 	"context"
 	"fmt"
+	"io"
 	"time"
 
 	uuid "github.com/satori/go.uuid"
@@ -14,6 +15,10 @@ import (
 	"github.com/go-pg/pg"
 )
 
+const Bitrate int32 = 96000
+const SecondsPerRead time.Duration = 5
+const BytesPerRead int32 = Bitrate * 8 / int32(SecondsPerRead)
+
 // Server implements the TrackDataService
 type Server struct {
 	db *pg.DB
@@ -22,6 +27,7 @@ type Server struct {
 // NewServer creates an instance of our server
 func NewServer(db *pg.DB) *Server {
 	//fmt.Printf("new server")
+
 	return &Server{db: db}
 }
 
@@ -48,6 +54,11 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 		return nil, twerr
 	}
 
+	_, twerr = internal.GetUuidFromString(userTrackPB.UserId)
+	if twerr != nil {
+		return nil, twerr
+	}
+
 	trackData := &models.TrackData{TrackId: trackId}
 	pgerr := server.db.Model(trackData).Where("track_id = ?", trackId).Select()
 	if pgerr != nil {
@@ -59,28 +70,26 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 		return nil, err
 	}
 
-	const bytesPerRead = 60000 // this is bytes per 5 seconds at 96kbps - really small!
-
 	trackChunk := &pb.TrackChunk{
 		StartPosition: 0,
-		NumBytes:      bytesPerRead,
+		NumBytes:      BytesPerRead,
 	}
 
-	//fmt.Printf("+++ %v\n", trackId)
-	//fmt.Printf("+++ %v\n", trackData)
-
-	ch := make(chan pb.TrackChunkOrError, bytesPerRead)
+	ch := make(chan pb.TrackChunkOrError, BytesPerRead)
 	go func() {
 		defer close(ch)
 		for {
 			td, err := GetTrackChunkFromStorage(trackData.StorageId, trackChunk, sc)
+			if err == io.EOF {
+				break
+			}
 			select {
 			case <-ctx.Done():
 				return
 			case ch <- pb.TrackChunkOrError{Msg: td, Err: err}:
 			}
-			time.Sleep(5000 * time.Millisecond)
-			trackChunk.StartPosition += bytesPerRead
+			time.Sleep(SecondsPerRead * time.Second)
+			trackChunk.StartPosition += BytesPerRead
 		}
 	}()
 

@@ -51,7 +51,7 @@ var _ = BeforeSuite(func() {
 	newTrackData = &models.TrackData{
 		TrackId:   uuid.NewV4(),
 		UserId:    uuid.NewV4(),
-		StorageId: "4_z134ab1f7e45796cc6950011e_f117076c66da42a22_d20180903_m010708_c002_v0001108_t0017",
+		StorageId: "4_z134ab1f7e45796cc6950011e_f11730b579d55bb63_d20180908_m164303_c002_v0001108_t0009",
 	}
 	err := db.Insert(newTrackData)
 	Expect(err).NotTo(HaveOccurred())

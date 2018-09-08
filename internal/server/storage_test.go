@@ -74,15 +74,14 @@ var _ = Describe("Track data server", func() {
 				sc, err := trackdataserver.OpenStorageConnection()
 				Expect(err).NotTo(HaveOccurred())
 
-				const bytesPerRead int32 = 12000 // temporary fake value
 				trackChunk := &pb.TrackChunk{
 					StartPosition: 100,
-					NumBytes:      bytesPerRead,
+					NumBytes:      trackdataserver.BytesPerRead,
 				}
 
 				trackChunk, err = trackdataserver.GetTrackChunkFromStorage(storageId, trackChunk, sc)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(trackChunk.NumBytes).To(Equal(bytesPerRead))
+				Expect(trackChunk.NumBytes).To(Equal(trackdataserver.BytesPerRead))
 				Expect(trackChunk.Data).NotTo(BeNil())
 				Expect(trackChunk.StartPosition).To(Equal(int32(100)))
 			})
@@ -94,10 +93,9 @@ var _ = Describe("Track data server", func() {
 				sc, err := trackdataserver.OpenStorageConnection()
 				Expect(err).NotTo(HaveOccurred())
 
-				const bytesPerRead int32 = 12000 // temporary fake value
 				trackChunk := &pb.TrackChunk{
 					StartPosition: 100,
-					NumBytes:      bytesPerRead,
+					NumBytes:      trackdataserver.BytesPerRead,
 				}
 
 				trackChunk, err = trackdataserver.GetTrackChunkFromStorage(storageId, trackChunk, sc)

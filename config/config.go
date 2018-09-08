@@ -1,5 +1,9 @@
 package config
 
+import (
+	"time"
+)
+
 var Config *config
 var StorageConfig *storage_config
 
@@ -15,6 +19,7 @@ func init() {
 		FileEndpoint:   "/b2api/v1/b2_download_file_by_id?fileId=",
 		UploadEndpoint: "/b2api/v1/b2_get_upload_url",
 		BucketId:       "134ab1f7e45796cc6950011e",
+		Timeout:        10,
 	}
 
 	Config = &config{TestingConfig, DevConfig}
@@ -39,4 +44,5 @@ type storage_config struct {
 	FileEndpoint   string
 	UploadEndpoint string
 	BucketId       string
+	Timeout        time.Duration
 }
