@@ -10,6 +10,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/twitchtv/twirp"
 
+	"os"
 	trackdataserver "track-server-api/internal/server"
 	pb "track-server-api/rpc"
 )
@@ -59,17 +60,20 @@ var _ = Describe("Track data server", func() {
 	})
 	Describe("UploadTrackData", func() {
 		Context("with valid track and user uuid", func() {
-			It("should respond with track stream if track exists", func() {
-				dat, err := ioutil.ReadFile("/Users/jhno/Desktop/bendy_13s.mp4")
+			It("should respond with trackserver id", func() {
+
+				wd, _ := os.Getwd()
+				fmt.Printf("%v\n", wd)
+				dat, err := ioutil.ReadFile("../../testdata/test_track_13s.m4a")
 				Expect(err).NotTo(HaveOccurred())
 
-				trackChunk := &pb.TrackChunk{
-					StartPosition: 0,
-					NumBytes:      int32(len(dat)),
-					Data:          dat,
+				trackUpload := &pb.TrackUpload{
+					Name:   "Server_test_file.",
+					UserId: uuid.NewV4().String(),
+					Data:   dat,
 				}
 
-				resp, err := service.UploadTrackData(context.Background(), trackChunk)
+				resp, err := service.UploadTrackData(context.Background(), trackUpload)
 				Expect(err).NotTo(HaveOccurred())
 
 				fmt.Printf("resp %v\n", resp)

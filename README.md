@@ -16,5 +16,5 @@ dep ensure
 retool build
 retool do protoc --proto_path=$GOPATH/src:. --twirp_out=. --go_out=. ./rpc/service.proto
 go run internal/database/migrations/*.go
-go test -v track-server-api/internal/server
+go test -v track-server-api/internal/server --ginkgo.v="true"
 ```

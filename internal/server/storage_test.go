@@ -39,8 +39,8 @@ var _ = Describe("Track data server", func() {
 		})
 	})
 	Describe("uploadTrack", func() {
-		Context("with valid StorageConnection and uploadUrl", func() {
-			It("should return an StorageId", func() {
+		Context("with valid arguments", func() {
+			It("should return a StorageId", func() {
 				sc, err := trackdataserver.OpenStorageConnection()
 				Expect(err).NotTo(HaveOccurred())
 
@@ -48,17 +48,16 @@ var _ = Describe("Track data server", func() {
 				Expect(err).NotTo(HaveOccurred())
 				fmt.Printf("uploading to: %v\n", uploadUrl)
 
-				dat, err := ioutil.ReadFile("/Users/jhno/Desktop/bendy_13s.mp4")
+				dat, err := ioutil.ReadFile("../../testdata/test_track_13s.m4a")
 				Expect(err).NotTo(HaveOccurred())
 
 				fmt.Printf("sending size: %d\n", len(dat))
 
-				tc := &pb.TrackChunk{
-					StartPosition: 0,
-					NumBytes:      int32(len(dat)),
-					Data:          dat,
+				trackUpload := &pb.TrackUpload{
+					Name: "Storage_test_file",
+					Data: dat,
 				}
-				s, err := trackdataserver.UploadTrackToStorage(tc, uploadUrl, sc)
+				s, err := trackdataserver.UploadTrackToStorage(trackUpload, uploadUrl, sc)
 				Expect(err).NotTo(HaveOccurred())
 
 				fmt.Printf("got storage: %v\n", s)

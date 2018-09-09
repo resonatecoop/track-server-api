@@ -116,6 +116,8 @@ func GetUploadUrl(sc *StorageConnection) (*UploadUrl, error) {
 	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer([]byte(s)))
 	req.Header.Set("Authorization", sc.AuthorizationToken)
 
+	fmt.Printf("GetUploadUrl: %v\n%v\n", req.URL, req.Header)
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -128,7 +130,7 @@ func GetUploadUrl(sc *StorageConnection) (*UploadUrl, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		msg := fmt.Sprintf("HTTP error %d while getting upload URL", resp.StatusCode)
+		msg := fmt.Sprintf("HTTP error %d response to getting upload URL", resp.StatusCode)
 		err := errors.New(msg)
 		return nil, err
 	}
@@ -142,20 +144,22 @@ func GetUploadUrl(sc *StorageConnection) (*UploadUrl, error) {
 	return uploadURL, nil
 }
 
-func UploadTrackToStorage(trackChunkPB *pb.TrackChunk, uploadUrl *UploadUrl, sc *StorageConnection) (*StorageFileInfo, error) {
+func UploadTrackToStorage(trackUpload *pb.TrackUpload, uploadUrl *UploadUrl, sc *StorageConnection) (*StorageFileInfo, error) {
 
 	var client = &http.Client{Timeout: config.StorageConfig.Timeout * time.Second} // with large upload this timeout has to be big enough...
 
 	h := sha1.New()
-	h.Write(trackChunkPB.Data)
+	h.Write(trackUpload.Data)
 	sha := fmt.Sprintf("%x", h.Sum(nil))
 
-	req, err := http.NewRequest("POST", uploadUrl.UploadUrl, bytes.NewBuffer(trackChunkPB.Data))
+	req, err := http.NewRequest("POST", uploadUrl.UploadUrl, bytes.NewBuffer(trackUpload.Data))
 	req.Header.Set("Authorization", uploadUrl.AuthorizationToken)
-	req.Header.Set("X-Bz-File-Name", "testfile")
+	req.Header.Set("X-Bz-File-Name", trackUpload.Name)
 	req.Header.Set("Content-Type", "audio/aac")
 	req.Header.Set("X-Bz-Content-Sha1", sha)
 	req.Header.Set("X-Bz-Info-Author", "unknown")
+
+	fmt.Printf("UploadTrack: %v\n%v\n", req.URL, req.Header)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -169,7 +173,7 @@ func UploadTrackToStorage(trackChunkPB *pb.TrackChunk, uploadUrl *UploadUrl, sc 
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		msg := fmt.Sprintf("HTTP error %d while getting upload URL", resp.StatusCode)
+		msg := fmt.Sprintf("HTTP error %d response to upload POST", resp.StatusCode)
 		err := errors.New(msg)
 		return nil, err
 	}

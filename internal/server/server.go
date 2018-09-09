@@ -99,7 +99,7 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 }
 
 // Upload a track stream
-func (server *Server) UploadTrackData(ctx context.Context, trackChunk *pb.TrackChunk) (*pb.TrackServerId, error) {
+func (server *Server) UploadTrackData(ctx context.Context, trackUpload *pb.TrackUpload) (*pb.TrackServerId, error) {
 	sc, err := OpenStorageConnection()
 	if err != nil {
 		return nil, err
@@ -111,16 +111,21 @@ func (server *Server) UploadTrackData(ctx context.Context, trackChunk *pb.TrackC
 	}
 
 	fmt.Printf("uploading to: %v\n", uploadUrl)
-	fmt.Printf("sending size: %d\n", len(trackChunk.Data))
+	fmt.Printf("sending size: %d\n", len(trackUpload.Data))
 
-	storageFileInfo, err := UploadTrackToStorage(trackChunk, uploadUrl, sc)
+	storageFileInfo, err := UploadTrackToStorage(trackUpload, uploadUrl, sc)
 	if err != nil {
 		return nil, err
 	}
 
+	userId, twerr := internal.GetUuidFromString(trackUpload.UserId)
+	if twerr != nil {
+		return nil, twerr
+	}
+
 	newTrackData := &models.TrackData{
-		TrackId:   uuid.NewV4(),
-		UserId:    uuid.NewV4(),
+		TrackId:   uuid.NewV4(), // this should be linked to user-track api, but how?
+		UserId:    userId,
 		StorageId: storageFileInfo.FileId,
 	}
 
