@@ -9,8 +9,8 @@ service TrackDataService {
 }
 
 message UserTrack {
-  string user_id = 1; // required
-  string track_id = 2; // required
+  string user_id = 1;
+  string track_id = 2;
 }
 
 message TrackServerId {
@@ -26,7 +26,8 @@ message TrackChunk {
 message TrackUpload {
   string name = 1;
   string user_id = 2;
-  bytes data = 3;
+  string track_id = 3;
+  bytes data = 4;
 }
 
 message Empty {

@@ -68,9 +68,10 @@ var _ = Describe("Track data server", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				trackUpload := &pb.TrackUpload{
-					Name:   "Server_test_file.",
-					UserId: uuid.NewV4().String(),
-					Data:   dat,
+					Name:    "Server_test_file.",
+					UserId:  uuid.NewV4().String(),
+					TrackId: uuid.NewV4().String(),
+					Data:    dat,
 				}
 
 				resp, err := service.UploadTrackData(context.Background(), trackUpload)
