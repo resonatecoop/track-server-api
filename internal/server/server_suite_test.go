@@ -16,9 +16,10 @@ import (
 )
 
 var (
-	db           *pg.DB
-	service      *trackdataserver.Server
-	newTrackData *models.TrackData
+	db            *pg.DB
+	service       *trackdataserver.Server
+	newTrackData  *models.TrackData
+	longTrackData *models.TrackData
 )
 
 func TestTrackData(t *testing.T) {
@@ -54,6 +55,13 @@ var _ = BeforeSuite(func() {
 		StorageId: "4_z134ab1f7e45796cc6950011e_f11730b579d55bb63_d20180908_m164303_c002_v0001108_t0009",
 	}
 	err := db.Insert(newTrackData)
+	Expect(err).NotTo(HaveOccurred())
+	longTrackData = &models.TrackData{
+		TrackId:   uuid.NewV4(),
+		UserId:    uuid.NewV4(),
+		StorageId: "4_z134ab1f7e45796cc6950011e_f103176d1223dadcf_d20180910_m014723_c002_v0001108_t0010",
+	}
+	err = db.Insert(longTrackData)
 	Expect(err).NotTo(HaveOccurred())
 })
 

@@ -35,7 +35,7 @@ var _ = Describe("Track data server", func() {
 					fmt.Printf("%d Streaming data at pos:%v len:%v\n", count, td.StartPosition, td.NumBytes)
 					count += 1
 				}
-				Expect(count).To(Equal(2)) // number of 60000 byte chunks in test file
+				Expect(count).To(Equal(2))
 			})
 			It("should respond with not_found error if track does not exist", func() {
 				userTrackPB := &pb.UserTrack{TrackId: uuid.NewV4().String(), UserId: uuid.NewV4().String()}
@@ -58,6 +58,32 @@ var _ = Describe("Track data server", func() {
 			})
 		})
 	})
+
+	Describe("StreamLongTrackData", func() {
+		Context("with valid track and user uuid", func() {
+			It("should stream track but end after 45 seconds", func() {
+				userTrackPB := &pb.UserTrack{TrackId: longTrackData.TrackId.String(), UserId: longTrackData.UserId.String()}
+				trackDataStream, err := service.StreamTrackData(context.Background(), userTrackPB)
+				Expect(err).NotTo(HaveOccurred())
+				count := 0
+				for tdOrErr := range trackDataStream {
+					Expect(tdOrErr.Err).NotTo(HaveOccurred())
+					td := tdOrErr.Msg
+					Expect(td.StartPosition).To(Equal(trackdataserver.BytesPerRead * int32(count)))
+					Expect(td.NumBytes).NotTo(Equal(0))
+					fmt.Printf("%d Streaming data at pos:%v len:%v\n", count, td.StartPosition, td.NumBytes)
+					count += 1
+				}
+				Expect(count).To(Equal(3))
+			})
+			It("should respond with not_found error if track does not exist", func() {
+				userTrackPB := &pb.UserTrack{TrackId: uuid.NewV4().String(), UserId: uuid.NewV4().String()}
+				_, err := service.StreamTrackData(context.Background(), userTrackPB)
+				Expect(err).To(HaveOccurred())
+			})
+		})
+	})
+
 	Describe("UploadTrackData", func() {
 		Context("with valid track and user uuid", func() {
 			It("should respond with trackserver id", func() {

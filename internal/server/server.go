@@ -23,6 +23,8 @@ const Bitrate int32 = 96000
 const SecondsPerRead time.Duration = 5
 const BytesPerRead int32 = Bitrate * 8 / int32(SecondsPerRead)
 
+const SecondsBeforeAuthRequired = 10
+
 // Server implements the TrackDataService
 type Server struct {
 	db *pg.DB
@@ -79,9 +81,22 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 		NumBytes:      BytesPerRead,
 	}
 
-	ch := make(chan pb.TrackChunkOrError, BytesPerRead)
+	//auth_ch := make(chan bool)
+	auth := false
+	start := time.Now()
+	prev := time.Now()
+	once := false
+
+	ch := make(chan pb.TrackChunkOrError)
 	go func() {
 		defer close(ch)
+
+		go func() {
+			// request pre-auth
+			time.Sleep(13 * time.Second)
+			auth = true
+		}()
+
 		for {
 			td, err := GetTrackChunkFromStorage(trackData.StorageId, trackChunk, sc)
 			if err == io.EOF {
@@ -92,12 +107,25 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 				return
 			case ch <- pb.TrackChunkOrError{Msg: td, Err: err}:
 			}
-			time.Sleep(SecondsPerRead * time.Second)
+
+			t := time.Now()
+			elapsed := t.Sub(prev)
+			next := t.Sub(start) + elapsed
+
+			fmt.Printf("auth %v next %v t\n", auth, next)
+
+			if !auth && next > SecondsBeforeAuthRequired*time.Second {
+				return
+			}
+
+			if once {
+				time.Sleep(SecondsPerRead*time.Second - elapsed)
+			}
+			once = true
+
 			trackChunk.StartPosition += BytesPerRead
 		}
 	}()
-
-	// TODO: Preauth payment with payment-api
 
 	return ch, nil
 }
