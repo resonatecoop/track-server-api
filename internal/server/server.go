@@ -11,9 +11,11 @@ import (
 	"time"
 
 	uuid "github.com/satori/go.uuid"
+	errorpkg "user-api/pkg/error"
+	uuidpkg "user-api/pkg/uuid"
 
-	"track-server-api/internal"
-	"track-server-api/internal/database/models"
+	"track-server-api/internal/model"
+	"track-server-api/internal/pkg/storage"
 	pb "track-server-api/rpc"
 
 	"github.com/go-pg/pg"
@@ -28,13 +30,18 @@ const SecondsBeforeAuthRequired = 10
 // Server implements the TrackDataService
 type Server struct {
 	db *pg.DB
+	sc Storage
+}
+
+type Storage interface {
+	GetTrackChunkFromStorage(string, *pb.TrackChunk) (*pb.TrackChunk, error)
+	GetUploadUrl() (*storage.UploadUrl, error)
+	UploadTrackToStorage(*pb.TrackUpload, *storage.UploadUrl) (*storage.StorageFileInfo, error)
 }
 
 // NewServer creates an instance of our server
-func NewServer(db *pg.DB) *Server {
-	//fmt.Printf("new server")
-
-	return &Server{db: db}
+func NewServer(db *pg.DB, sc Storage) *Server {
+	return &Server{db: db, sc: sc}
 }
 
 // Request a track stream
@@ -55,25 +62,20 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 	// 	return nil, twirp.NotFoundError("track id not found")
 	// }
 
-	trackId, twerr := internal.GetUuidFromString(userTrackPB.TrackId)
+	trackId, twerr := uuidpkg.GetUuidFromString(userTrackPB.TrackId)
 	if twerr != nil {
 		return nil, twerr
 	}
 
-	_, twerr = internal.GetUuidFromString(userTrackPB.UserId)
+	_, twerr = uuidpkg.GetUuidFromString(userTrackPB.UserId)
 	if twerr != nil {
 		return nil, twerr
 	}
 
-	trackData := &models.TrackData{TrackId: trackId}
+	trackData := &model.TrackData{TrackId: trackId}
 	pgerr := server.db.Model(trackData).Where("track_id = ?", trackId).Select()
 	if pgerr != nil {
-		return nil, internal.CheckError(pgerr, "track_data")
-	}
-
-	sc, err := OpenStorageConnection()
-	if err != nil {
-		return nil, err
+		return nil, errorpkg.CheckError(pgerr, "track_data")
 	}
 
 	trackChunk := &pb.TrackChunk{
@@ -98,7 +100,7 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 		}()
 
 		for {
-			td, err := GetTrackChunkFromStorage(trackData.StorageId, trackChunk, sc)
+			td, err := server.sc.GetTrackChunkFromStorage(trackData.StorageId, trackChunk)
 			if err == io.EOF {
 				break
 			}
@@ -169,27 +171,22 @@ func (server *Server) UploadTrackData(ctx context.Context, trackUpload *pb.Track
 		Data:    data,
 	}
 
-	sc, err := OpenStorageConnection()
+	uploadUrl, err := server.sc.GetUploadUrl()
 	if err != nil {
 		return nil, err
 	}
 
-	uploadUrl, err := GetUploadUrl(sc)
+	storageFileInfo, err := server.sc.UploadTrackToStorage(newTrackUpload, uploadUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	storageFileInfo, err := UploadTrackToStorage(newTrackUpload, uploadUrl, sc)
-	if err != nil {
-		return nil, err
-	}
-
-	userId, twerr := internal.GetUuidFromString(newTrackUpload.UserId)
+	userId, twerr := uuidpkg.GetUuidFromString(newTrackUpload.UserId)
 	if twerr != nil {
 		return nil, twerr
 	}
 
-	newTrackData := &models.TrackData{
+	newTrackData := &model.TrackData{
 		TrackId:   uuid.NewV4(), // this should be linked to user-track api, but how?
 		UserId:    userId,
 		StorageId: storageFileInfo.FileId,

@@ -1,0 +1,32 @@
+server:
+  port: :8080
+  read_timeout_seconds: 31
+  write_timeout_seconds: 30
+
+database:
+  dev:
+    psn: postgres://track_resonate_dev_user:password@127.0.0.1:5432/track_resonate_dev?sslmode=disable
+    log_queries: false
+    timeout_seconds: 10
+  test:
+    psn: postgres://track_resonate_testing_user:@127.0.0.1:5432/track_resonate_testing?sslmode=disable
+    log_queries: false
+    timeout_seconds: 10
+
+jwt:
+  secret: jwtsecret # Change this value
+  duration_minutes: 15
+  signing_algorithm: HS256
+
+openapi:
+ username: admin
+ password: admin
+
+storage:
+  account_id: "3a17476c901e"
+  key: "00257352ce3d0c8db20fdd511881f1e5e2508269ad"
+  auth_endpoint: "https://api.backblazeb2.com/b2api/v1/b2_authorize_account"
+  file_endpoint: "/b2api/v1/b2_download_file_by_id?fileId="
+  upload_endpoint: "/b2api/v1/b2_get_upload_url"
+  bucket_id: "134ab1f7e45796cc6950011e"
+  timeout: 10

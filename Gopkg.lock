@@ -2,41 +2,69 @@
 
 
 [[projects]]
+  digest = "1:9b678d4adcff3f52856870f7b1c66751b4a571e32213be6222cdd9ee4001e6fb"
   name = "github.com/go-pg/migrations"
   packages = ["."]
-  revision = "91a824bb86a910befc819700ec6e21858c41b022"
-  version = "v6.2.0"
+  pruneopts = "UT"
+  revision = "507ad1fcc046a356ccf947b5b486e9ecc7097d37"
+  version = "v6.7.3"
 
 [[projects]]
+  digest = "1:d02b94ed7089fc72fcd2e89c89df858c843470fe36788df39bf45e074293165e"
   name = "github.com/go-pg/pg"
   packages = [
     ".",
     "internal",
+    "internal/iszero",
     "internal/parser",
     "internal/pool",
+    "internal/struct_filter",
+    "internal/tag",
     "orm",
-    "types"
+    "types",
   ]
-  revision = "5a864bc8762fd5f0b547374971878cd6412aa0f3"
-  version = "v6.13.4"
+  pruneopts = "UT"
+  revision = "11cb265cd96c769490bea4cdc3634ea2049197f6"
+  version = "v8.0.4"
 
 [[projects]]
+  digest = "1:7e84d43e13c40dd0e5982be013881b5ced48550237cfb35e12e0579d31f6276a"
   name = "github.com/golang/protobuf"
   packages = [
     "jsonpb",
     "proto",
-    "ptypes/struct"
+    "ptypes/struct",
   ]
+  pruneopts = "UT"
   revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:3af6be4fee7c08f81f13d36f04ffb63ad4b6b5aaba12cce96095c7c2863d4912"
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ed099d42384823742bba0bf9a72b53b55c9e2e38"
+  version = "v1.7.2"
+
+[[projects]]
   branch = "master"
+  digest = "1:fd97437fbb6b7dce04132cf06775bd258cce305c44add58eb55ca86c6c325160"
   name = "github.com/jinzhu/inflection"
   packages = ["."]
+  pruneopts = "UT"
   revision = "04140366298a54a039076d798123ffa108fff46c"
 
 [[projects]]
+  branch = "master"
+  digest = "1:e74fa8e635591eb1ad79e8e711bff8bea4e12e9737563daf12af325c6ea206e4"
+  name = "github.com/justinas/alice"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "03f45bd4b7dad4734bc4620e46a35789349abb20"
+
+[[projects]]
+  digest = "1:72f35d3e412bc67b121e15ea4c88a3b3da8bcbc2264339e7ffa4a1865799840c"
   name = "github.com/onsi/ginkgo"
   packages = [
     ".",
@@ -56,12 +84,14 @@
     "reporters/stenographer",
     "reporters/stenographer/support/go-colorable",
     "reporters/stenographer/support/go-isatty",
-    "types"
+    "types",
   ]
+  pruneopts = "UT"
   revision = "fa5fabab2a1bfbd924faf4c067d07ae414e2aedf"
   version = "v1.5.0"
 
 [[projects]]
+  digest = "1:d0c2c4e2d0006cd28c220a549cda1de8e67abc65ed4c572421492bbf0492ceaf"
   name = "github.com/onsi/gomega"
   packages = [
     ".",
@@ -75,50 +105,70 @@
     "matchers/support/goraph/edge",
     "matchers/support/goraph/node",
     "matchers/support/goraph/util",
-    "types"
+    "types",
   ]
+  pruneopts = "UT"
   revision = "62bff4df71bdbc266561a0caee19f0594b17c240"
   version = "v1.4.0"
 
 [[projects]]
+  digest = "1:d2f8ec47e1957eaf4d4ea9ddfcb9b4c33771229104669e697ee07c9a9d54918e"
   name = "github.com/rs/cors"
   packages = ["."]
+  pruneopts = "UT"
   revision = "feef513b9575b32f84bafa580aad89b011259019"
   version = "v1.3.0"
 
 [[projects]]
+  digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
   name = "github.com/satori/go.uuid"
   packages = ["."]
+  pruneopts = "UT"
   revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
   version = "v1.2.0"
 
 [[projects]]
   branch = "v6_streams_alpha"
+  digest = "1:04cefade3aeffea316b113c1e340d5251e4b4d2238877038d3f7e32916c9a933"
   name = "github.com/twitchtv/twirp"
   packages = [
     ".",
     "ctxsetters",
-    "internal/contextkeys"
+    "internal/contextkeys",
   ]
+  pruneopts = "UT"
   revision = "c1dacbaed519a06890ebdcdcd392b885694405af"
 
 [[projects]]
   branch = "master"
+  digest = "1:f92f6956e4059f6a3efc14924d2dd58ba90da25cc57fe07ae3779ef2f5e0c5f2"
+  name = "golang.org/x/crypto"
+  packages = ["pbkdf2"]
+  pruneopts = "UT"
+  revision = "f99c8df09eb5bff426315721bfa5f16a99cad32c"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e2a579de26b74a8d2a7c4eba30ec65d895ef4cede50639d654734558cd2a917e"
   name = "golang.org/x/net"
   packages = [
     "html",
     "html/atom",
-    "html/charset"
+    "html/charset",
   ]
+  pruneopts = "UT"
   revision = "1e491301e022f8f977054da4c2d852decd59571f"
 
 [[projects]]
   branch = "master"
+  digest = "1:fcf2b18db0af0f60d58e71ae8ed15555d46fdca3fc2529f65a14cef30ced981f"
   name = "golang.org/x/sys"
   packages = ["unix"]
+  pruneopts = "UT"
   revision = "538ab54ba952cc4c7c705fa213fbf7993c97c175"
 
 [[projects]]
+  digest = "1:aa4d6967a3237f8367b6bf91503964a77183ecf696f1273e8ad3551bb4412b5f"
   name = "golang.org/x/text"
   packages = [
     "encoding",
@@ -137,20 +187,45 @@
     "language",
     "runes",
     "transform",
-    "unicode/cldr"
+    "unicode/cldr",
   ]
+  pruneopts = "UT"
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
 
 [[projects]]
+  digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
+  pruneopts = "UT"
   revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
   version = "v2.2.1"
+
+[[projects]]
+  digest = "1:999d566ad1ae4303c456af5a155f7b42401cca4fd33552567ed9dd997b107a08"
+  name = "mellium.im/sasl"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e58e780e1378aa4df5dc705364ff5ae9a4dd1e04"
+  version = "v0.2.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b461502f9babe64983ca22c0b3937d79379b53e8b751b641d380691d9debc50c"
+  input-imports = [
+    "github.com/go-pg/migrations",
+    "github.com/go-pg/pg",
+    "github.com/go-pg/pg/orm",
+    "github.com/golang/protobuf/jsonpb",
+    "github.com/golang/protobuf/proto",
+    "github.com/gorilla/mux",
+    "github.com/justinas/alice",
+    "github.com/onsi/ginkgo",
+    "github.com/onsi/gomega",
+    "github.com/rs/cors",
+    "github.com/satori/go.uuid",
+    "github.com/twitchtv/twirp",
+    "github.com/twitchtv/twirp/ctxsetters",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -2,24 +2,26 @@ package trackdataserver_test
 
 import (
 	"testing"
+	"path/filepath"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	uuid "github.com/satori/go.uuid"
-
 	"github.com/go-pg/pg"
 
-	"track-server-api/internal/database"
-	"track-server-api/internal/database/models"
+	"user-api/pkg/config"
+	"user-api/pkg/postgres"
 
+	"track-server-api/internal/model"
+	"track-server-api/internal/pkg/storage"
 	trackdataserver "track-server-api/internal/server"
 )
 
 var (
 	db            *pg.DB
 	service       *trackdataserver.Server
-	newTrackData  *models.TrackData
-	longTrackData *models.TrackData
+	newTrackData  *model.TrackData
+	longTrackData *model.TrackData
 )
 
 func TestTrackData(t *testing.T) {
@@ -28,9 +30,27 @@ func TestTrackData(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	testing := true
-	db = database.Connect(testing)
-	service = trackdataserver.NewServer(db)
+	var err error
+
+	cfgPath, err := filepath.Abs("./../../../conf.local.yaml")
+	Expect(err).NotTo(HaveOccurred())
+
+	cfg, err := config.Load(cfgPath)
+	Expect(err).NotTo(HaveOccurred())
+
+	db, err = pgsql.New(cfg.DB.Test.PSN, cfg.DB.Test.LogQueries, cfg.DB.Test.TimeoutSeconds)
+	Expect(err).NotTo(HaveOccurred())
+
+	sc, err := storage.New(
+		cfg.Storage.AccountId,
+		cfg.Storage.Key,
+		cfg.Storage.AuthEndpoint,
+		cfg.Storage.FileEndpoint,
+		cfg.Storage.UploadEndpoint,
+		cfg.Storage.BucketId,
+		cfg.Storage.Timeout)
+
+	service = trackdataserver.NewServer(db, sc)
 
 	// How will we do multi-API setup? ??
 
@@ -47,16 +67,16 @@ var _ = BeforeSuite(func() {
 	// newTrack, err := trackClient.CreateTrack(context.Background(), newTrack)
 	// Expect(err).NotTo(HaveOccurred())
 
-	// newTrackId, err := internal.GetUuidFromString(newTrack.Id)
+	// newTrackId, err := uuidpkg.GetUuidFromString(newTrack.Id)
 
-	newTrackData = &models.TrackData{
+	newTrackData = &model.TrackData{
 		TrackId:   uuid.NewV4(),
 		UserId:    uuid.NewV4(),
 		StorageId: "4_z134ab1f7e45796cc6950011e_f11730b579d55bb63_d20180908_m164303_c002_v0001108_t0009",
 	}
 	err := db.Insert(newTrackData)
 	Expect(err).NotTo(HaveOccurred())
-	longTrackData = &models.TrackData{
+	longTrackData = &model.TrackData{
 		TrackId:   uuid.NewV4(),
 		UserId:    uuid.NewV4(),
 		StorageId: "4_z134ab1f7e45796cc6950011e_f103176d1223dadcf_d20180910_m014723_c002_v0001108_t0010",
@@ -66,7 +86,7 @@ var _ = BeforeSuite(func() {
 })
 
 var _ = AfterSuite(func() {
-	var tracks []models.TrackData
+	var tracks []model.TrackData
 	err := db.Model(&tracks).Select()
 	Expect(err).NotTo(HaveOccurred())
 	_, err = db.Model(&tracks).Delete()

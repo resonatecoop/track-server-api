@@ -2,7 +2,6 @@ package orm
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/go-pg/pg/internal"
 )
@@ -59,7 +58,8 @@ func (q *Query) CountEstimate(threshold int) (int, error) {
 
 	for i := 0; i < 3; i++ {
 		var count int
-		_, err = q.db.QueryOne(
+		_, err = q.db.QueryOneContext(
+			q.ctx,
 			Scan(&count),
 			"SELECT _go_pg_count_estimate_v2(?, ?)",
 			string(query), threshold,
@@ -69,7 +69,10 @@ func (q *Query) CountEstimate(threshold int) (int, error) {
 				// undefined_function
 				err = q.createCountEstimateFunc()
 				if err != nil {
-					return 0, err
+					pgerr, ok := err.(internal.PGError)
+					if !ok || !pgerr.IntegrityViolation() {
+						return 0, err
+					}
 				}
 				continue
 			}
@@ -81,41 +84,6 @@ func (q *Query) CountEstimate(threshold int) (int, error) {
 }
 
 func (q *Query) createCountEstimateFunc() error {
-	_, err := q.db.Exec(pgCountEstimateFunc)
+	_, err := q.db.ExecContext(q.ctx, pgCountEstimateFunc)
 	return err
-}
-
-// SelectAndCountEstimate runs Select and CountEstimate in two goroutines,
-// waits for them to finish and returns the result.
-func (q *Query) SelectAndCountEstimate(threshold int, values ...interface{}) (count int, err error) {
-	if q.stickyErr != nil {
-		return 0, q.stickyErr
-	}
-
-	var wg sync.WaitGroup
-	wg.Add(2)
-	var mu sync.Mutex
-
-	go func() {
-		defer wg.Done()
-		if e := q.Select(values...); e != nil {
-			mu.Lock()
-			err = e
-			mu.Unlock()
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-		var e error
-		count, e = q.CountEstimate(threshold)
-		if e != nil {
-			mu.Lock()
-			err = e
-			mu.Unlock()
-		}
-	}()
-
-	wg.Wait()
-	return count, err
 }
