@@ -61,3 +61,7 @@
 [[constraint]]
   branch = "v6_streams_alpha"
   name = "github.com/twitchtv/twirp"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/blushi/user-api"

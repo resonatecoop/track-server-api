@@ -8,8 +8,8 @@ import (
 
 	"github.com/go-pg/migrations"
 
-	"user-api/pkg/config"
-	"user-api/pkg/postgres"
+	"github.com/blushi/user-api/pkg/config"
+	"github.com/blushi/user-api/pkg/postgres"
 )
 
 const usageText = `This program runs command on the db. Supported commands are:
@@ -34,7 +34,7 @@ func main() {
 		flags = flags[:len(flags)-1]
 	}
 
-	cfgPath, err := filepath.Abs("./../../conf.local.yaml")
+	cfgPath, err := filepath.Abs("./conf.local.yaml")
 	if err != nil {
 		exitf(err.Error())
 	}

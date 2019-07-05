@@ -11,8 +11,8 @@ import (
 	"time"
 
 	uuid "github.com/satori/go.uuid"
-	errorpkg "user-api/pkg/error"
-	uuidpkg "user-api/pkg/uuid"
+	errorpkg "github.com/blushi/user-api/pkg/error"
+	uuidpkg "github.com/blushi/user-api/pkg/uuid"
 
 	"track-server-api/internal/model"
 	"track-server-api/internal/pkg/storage"
@@ -105,9 +105,9 @@ func (server *Server) StreamTrackData(ctx context.Context, userTrackPB *pb.UserT
 				break
 			}
 			select {
-			case <-ctx.Done():
-				return
-			case ch <- pb.TrackChunkOrError{Msg: td, Err: err}:
+				case <-ctx.Done():
+					return
+				case ch <- pb.TrackChunkOrError{Msg: td, Err: err}:
 			}
 
 			t := time.Now()

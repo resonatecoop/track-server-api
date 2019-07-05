@@ -2,17 +2,15 @@ package main
 
 import (
 	"flag"
-	"context"
-	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
-	"github.com/rs/cors"
 	// "user-api/pkg/zerolog"
-	"user-api/pkg/mw"
-	"user-api/pkg/config"
-	"user-api/pkg/postgres"
+	"github.com/blushi/user-api/pkg/mw"
+	"github.com/blushi/user-api/pkg/config"
+	"github.com/blushi/user-api/pkg/postgres"
 
 	"track-server-api/internal/pkg/storage"
 	trackDataServer "track-server-api/internal/server"
@@ -50,7 +48,7 @@ func registerRoutes(r *mux.Router, cfg *config.Configuration) {
 	checkErr(err)
 
 	server := trackDataServer.NewServer(db, sc)
-	trackDataTwirpHandler := rpc.NewTrackDataServiceServer(server, nil))
+	trackDataTwirpHandler := rpc.NewTrackDataServiceServer(server, nil)
 	r.PathPrefix(rpc.TrackDataServicePathPrefix).Handler(trackDataTwirpHandler)
 }
 

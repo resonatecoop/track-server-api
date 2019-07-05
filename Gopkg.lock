@@ -2,6 +2,20 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:8ae600e5d07d22cf3e184ef370f424f22420e4e8a7bf092b879f7afe62accfc1"
+  name = "github.com/blushi/user-api"
+  packages = [
+    "pkg/config",
+    "pkg/error",
+    "pkg/mw",
+    "pkg/postgres",
+    "pkg/uuid",
+  ]
+  pruneopts = "UT"
+  revision = "a54d08e50691962a19f0650ad84bc4384dcb4e5f"
+
+[[projects]]
   digest = "1:9b678d4adcff3f52856870f7b1c66751b4a571e32213be6222cdd9ee4001e6fb"
   name = "github.com/go-pg/migrations"
   packages = ["."]
@@ -10,7 +24,7 @@
   version = "v6.7.3"
 
 [[projects]]
-  digest = "1:d02b94ed7089fc72fcd2e89c89df858c843470fe36788df39bf45e074293165e"
+  digest = "1:01700fee66fd615d2aebaf04ec8f8630b944ec5a7a43062c6daf1560ec7065c6"
   name = "github.com/go-pg/pg"
   packages = [
     ".",
@@ -22,6 +36,7 @@
     "internal/tag",
     "orm",
     "types",
+    "urlvalues",
   ]
   pruneopts = "UT"
   revision = "11cb265cd96c769490bea4cdc3634ea2049197f6"
@@ -194,12 +209,12 @@
   version = "v0.3.0"
 
 [[projects]]
-  digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
+  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
-  version = "v2.2.1"
+  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
 
 [[projects]]
   digest = "1:999d566ad1ae4303c456af5a155f7b42401cca4fd33552567ed9dd997b107a08"
@@ -213,6 +228,11 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/blushi/user-api/pkg/config",
+    "github.com/blushi/user-api/pkg/error",
+    "github.com/blushi/user-api/pkg/mw",
+    "github.com/blushi/user-api/pkg/postgres",
+    "github.com/blushi/user-api/pkg/uuid",
     "github.com/go-pg/migrations",
     "github.com/go-pg/pg",
     "github.com/go-pg/pg/orm",

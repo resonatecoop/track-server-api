@@ -15,6 +15,8 @@ cd track-server-api
 dep ensure
 retool build
 retool do protoc --proto_path=$GOPATH/src:. --twirp_out=. --go_out=. ./rpc/service.proto
+Add create extension if not exists "uuid-ossp";
+go run cmd/migration/*.go init
 go run cmd/migration/*.go
 go test -v track-server-api/internal/server --ginkgo.v="true"
 ```

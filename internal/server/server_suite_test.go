@@ -9,8 +9,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/go-pg/pg"
 
-	"user-api/pkg/config"
-	"user-api/pkg/postgres"
+	"github.com/blushi/user-api/pkg/config"
+	"github.com/blushi/user-api/pkg/postgres"
 
 	"track-server-api/internal/model"
 	"track-server-api/internal/pkg/storage"
