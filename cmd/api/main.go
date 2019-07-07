@@ -13,7 +13,7 @@ import (
 	"github.com/blushi/user-api/pkg/postgres"
 
 	"track-server-api/internal/pkg/storage"
-	trackDataServer "track-server-api/internal/server"
+	trackdataserver "track-server-api/internal/server"
 	rpc "track-server-api/rpc"
 
 )
@@ -47,7 +47,7 @@ func registerRoutes(r *mux.Router, cfg *config.Configuration) {
 		cfg.Storage.Timeout)
 	checkErr(err)
 
-	server := trackDataServer.NewServer(db, sc)
+	server := trackdataserver.NewServer(db, sc)
 	trackDataTwirpHandler := rpc.NewTrackDataServiceServer(server, nil)
 	r.PathPrefix(rpc.TrackDataServicePathPrefix).Handler(trackDataTwirpHandler)
 }

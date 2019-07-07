@@ -32,7 +32,7 @@ func TestTrackData(t *testing.T) {
 var _ = BeforeSuite(func() {
 	var err error
 
-	cfgPath, err := filepath.Abs("./../../../conf.local.yaml")
+	cfgPath, err := filepath.Abs("./../../conf.local.yaml")
 	Expect(err).NotTo(HaveOccurred())
 
 	cfg, err := config.Load(cfgPath)
@@ -74,7 +74,7 @@ var _ = BeforeSuite(func() {
 		UserId:    uuid.NewV4(),
 		StorageId: "4_z134ab1f7e45796cc6950011e_f11730b579d55bb63_d20180908_m164303_c002_v0001108_t0009",
 	}
-	err := db.Insert(newTrackData)
+	err = db.Insert(newTrackData)
 	Expect(err).NotTo(HaveOccurred())
 	longTrackData = &model.TrackData{
 		TrackId:   uuid.NewV4(),

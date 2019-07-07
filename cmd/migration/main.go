@@ -34,7 +34,7 @@ func main() {
 		flags = flags[:len(flags)-1]
 	}
 
-	cfgPath, err := filepath.Abs("./conf.local.yaml")
+	cfgPath, err := filepath.Abs("./../../conf.local.yaml")
 	if err != nil {
 		exitf(err.Error())
 	}
